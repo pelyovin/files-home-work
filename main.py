@@ -1,15 +1,19 @@
 # Задача 1
-with open('recipes.txt') as f:
+def open_cook_book(recipes):
+    """Функция принимает файл с рецептами и формирует из него словарь, где ключи - названия блюд, а
+    значениями является словарь с необходимыми продуктами, их количеством и мерой."""
     cook_book = {}
-    for i in f:
-        dish_name = i.strip()
-        ingredients_count = f.readline()
-        ingredients = []
-        for j in range(int(ingredients_count)):
-            name, quantity, measure = f.readline().strip().split(' | ')
-            ingredients.append({'ingredient_name': name, 'quantity': int(quantity), 'measure': measure})
-        f.readline()
-        cook_book[dish_name] = ingredients
+    with open(recipes) as f:
+        for i in f:
+            dish_name = i.strip()
+            ingredients_count = f.readline()
+            ingredients = []
+            for j in range(int(ingredients_count)):
+                name, quantity, measure = f.readline().strip().split(' | ')
+                ingredients.append({'ingredient_name': name, 'quantity': int(quantity), 'measure': measure})
+            f.readline()
+            cook_book[dish_name] = ingredients
+    return cook_book
 
 
 # Задача 2
@@ -18,7 +22,7 @@ def get_shop_list_by_dishes(dishes, person_count):
     и возвращает словарь с названием ингредиентов и его количества для блюда"""
     result = {}
     for dish in dishes:
-        for ingredient in cook_book[dish]:
+        for ingredient in open_cook_book('recipes.txt')[dish]:
             if ingredient['ingredient_name'] not in result:
                 result[ingredient['ingredient_name']] = {'measure': ingredient['measure'],
                                                          'quantity': ingredient['quantity'] * person_count}
@@ -28,18 +32,20 @@ def get_shop_list_by_dishes(dishes, person_count):
 
 
 # Задача 3
-with open('sorted/1.txt') as f1, open('sorted/2.txt') as f2, open('sorted/3.txt') as f3:
-    nums_of_lines = len(f1.readlines()), len(f2.readlines()), len(f3.readlines())
-
-with open('sorted/1.txt') as f1, open('sorted/2.txt') as f2, open('sorted/3.txt') as f3:
+def sorted_files(path):
+    """Функция формирует один новый файл, где содержимое файлов сортируется
+    по количеству строк от меньшего к большему"""
+    import os
     dict_of_files = {}
-    dict_of_files[nums_of_lines[0]] = f'1.txt\n{nums_of_lines[0]}\n{f1.read()}'
-    dict_of_files[nums_of_lines[1]] = f'2.txt\n{nums_of_lines[1]}\n{f2.read()}'
-    dict_of_files[nums_of_lines[2]] = f'3.txt\n{nums_of_lines[2]}\n{f3.read()}'
-    sorted_dict = {}
-    for key, value in sorted(dict_of_files.items()):
-        sorted_dict[key] = value
+    for file in os.listdir(path):
+        with open(path + file) as f:
+            if file.endswith('.txt'):
+                count = len(f.readlines())
+                f.seek(0)
+                dict_of_files[count] = [file, f.read()]
+    with open(path + 'sorted_file.txt', 'a') as f:
+        for k, v in sorted(dict_of_files.items()):
+            f.write(f'{v[0]}\n{k}\n{v[1]}\n')
 
-with open('sorted/sorted-file.txt', 'a') as f:
-    for k, v in sorted_dict.items():
-        f.write(v + '\n')
+
+sorted_files('/Users/alex/netology/files-home-work/sorted/')
